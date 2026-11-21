@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quản Lý Nhập Hàng 1688 & Đơn Bán Facebook</title>
+  <title>Liều càng nhiều, một bước lên mây</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -15,20 +15,17 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
+  <link rel="icon" type="image/jpeg" href="./rick-and-morty-rick-3840x2160-9531.jpg" />
 </head>
 <body class="text-slate-800 antialiased pb-16">
 
   <!-- Top Navigation Bar -->
   <header class="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 text-white shadow-lg sticky top-0 z-30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="bg-white/20 p-2.5 rounded-xl backdrop-blur-sm">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-          </svg>
-        </div>
+      <div class="flex items-center gap-3.5 relative z-10">
+        <img src="./rick-and-morty-rick-3840x2160-9531.jpg" alt="Ảnh đại diện trang web" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-white/80 shadow-md shrink-0" />
         <div>
-          <h1 class="text-lg sm:text-xl font-bold tracking-tight">Sổ Kho 1688 & Chốt Đơn Facebook</h1>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">Liều càng nhiều, một bước lên mây</h1>
           <p class="text-xs text-blue-100">Quản lý nhập lô, phân bổ ship theo kg & tính lời/lỗ tự động</p>
         </div>
       </div>
@@ -970,8 +967,7 @@
         ].map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',');
       });
 
-      const csvContent = '﻿' + [headers.join(','), ...rows].join('
-');
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
