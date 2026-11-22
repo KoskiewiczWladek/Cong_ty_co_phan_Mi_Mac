@@ -9,7 +9,6 @@
   <style>
     body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
-    /* Custom scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
@@ -26,7 +25,7 @@
         <img src="./rick-and-morty-rick-3840x2160-9531.jpg" alt="Ảnh đại diện trang web" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-white/80 shadow-md shrink-0" />
         <div>
           <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">Liều càng nhiều, một bước lên mây</h1>
-          <p class="text-xs text-blue-100">Quản lý nhập lô, phân bổ ship theo kg & tính lời/lỗ tự động</p>
+          <p class="text-xs text-blue-100">Quản lý nhập lô, phân bổ ship theo kg & ghi từng lần chốt đơn</p>
         </div>
       </div>
 
@@ -127,7 +126,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
           </span>
         </div>
-        <div class="mt-3 flex items-center gap-3 text-sm font-bold">
+        <div class="mt-3 flex items-center gap-2.5 text-xs sm:text-sm font-bold flex-wrap">
           <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700" id="kpi-win-count">0 Lời</span>
           <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700" id="kpi-even-count">0 Hòa</span>
           <span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700" id="kpi-loss-count">0 Lỗ</span>
@@ -141,7 +140,7 @@
         <!-- Search Input -->
         <div class="relative flex-1">
           <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" id="searchInput" oninput="renderTable()" placeholder="Tìm nhanh tên mặt hàng, mã lô, phân loại màu/size, ghi chú 1688..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <input type="text" id="searchInput" oninput="renderTable()" placeholder="Tìm nhanh tên mặt hàng, mã lô, phân loại màu/size, tên khách FB..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         </div>
 
         <!-- Status Pills -->
@@ -167,8 +166,8 @@
               <th class="py-3.5 px-4 text-right">Ship TQ-VN<br><span class="text-[10px] font-normal text-slate-400">(1 món / kg)</span></th>
               <th class="py-3.5 px-4 text-right bg-indigo-50/50 text-indigo-700">Giá vốn sau ship<br><span class="text-[10px] font-normal text-indigo-400">(1 món)</span></th>
               <th class="py-3.5 px-4 text-center">Kho (Bán / Nhập)</th>
-              <th class="py-3.5 px-4 text-right">Giá bán & Ngày bán</th>
-              <th class="py-3.5 px-4 text-right">Lời / Lỗ thực tế</th>
+              <th class="py-3.5 px-4">Lịch sử các lần bán</th>
+              <th class="py-3.5 px-4 text-right">Tổng Lời / Lỗ</th>
               <th class="py-3.5 px-4 text-center">Thao tác</th>
             </tr>
           </thead>
@@ -210,7 +209,7 @@
 
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Mã lô / Ghi chú chuyến hàng</label>
-            <input type="text" id="batchCode" placeholder="VD: Lô áo khoác 21/11..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+            <input type="text" id="batchCode" placeholder="VD: Lô 22/11..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
           </div>
 
           <div>
@@ -251,75 +250,117 @@
     </div>
   </div>
 
-  <!-- MODAL 2: CHỐT ĐƠN / CẬP NHẬT GIÁ BÁN & CHỈNH SỬA MẶT HÀNG -->
+  <!-- MODAL 2: CHỐT ĐƠN MỚI & LỊCH SỬ BÁN TỪNG LẦN (Mỗi lần 1 giá riêng biệt) -->
   <div id="sellModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
-      <div class="bg-emerald-600 text-white px-6 py-4 flex items-center justify-between">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-6 overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="bg-emerald-600 text-white px-6 py-4 flex items-center justify-between shrink-0">
         <div>
-          <h2 class="text-lg font-bold">Cập Nhật Bán Hàng / Chốt Đơn</h2>
-          <p id="sellModalSubtitle" class="text-xs text-emerald-100 truncate max-w-xs sm:max-w-sm"></p>
+          <h2 class="text-lg font-bold">Chốt Đơn & Lịch Sử Xuất Bán</h2>
+          <p id="sellModalSubtitle" class="text-xs text-emerald-100 truncate max-w-md"></p>
         </div>
         <button onclick="closeSellModal()" class="text-white/80 hover:text-white p-1">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <div class="p-6 space-y-4">
+      <div class="p-6 overflow-y-auto space-y-5 flex-1">
         <input type="hidden" id="editItemId" />
 
-        <!-- Cost Reference Box -->
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 grid grid-cols-2 gap-3 text-xs">
+        <!-- Cost & Stock Summary Box -->
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 grid grid-cols-3 gap-3 text-xs">
           <div>
-            <span class="text-slate-500 block">Giá nhập chưa ship (1 món):</span>
+            <span class="text-slate-500 block">Giá chưa ship (1 món):</span>
             <span id="refBasePrice" class="font-bold text-slate-800 text-sm tabular-nums">0 đ</span>
           </div>
           <div>
-            <span class="text-indigo-600 font-semibold block">Giá vốn sau ship (1 món):</span>
+            <span class="text-indigo-600 font-semibold block">Giá vốn sau ship:</span>
             <span id="refLandedCost" class="font-extrabold text-indigo-700 text-sm tabular-nums">0 đ</span>
           </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Tổng số lượng nhập</label>
-            <input type="number" id="editQtyImported" min="1" oninput="updateSellPreview()" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-emerald-700 mb-1">Số lượng đã bán *</label>
-            <input type="number" id="editQtySold" min="0" oninput="updateSellPreview()" class="w-full border border-emerald-300 bg-emerald-50/30 rounded-xl px-3 py-2 text-sm font-bold text-emerald-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            <span class="text-amber-700 font-semibold block">Tồn kho còn lại:</span>
+            <span id="refRemainStock" class="font-extrabold text-amber-700 text-sm tabular-nums">0 / 0</span>
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-emerald-700 mb-1">Giá bán ra trung bình / thực tế (VNĐ / 1 món) *</label>
-          <div class="flex items-center gap-1.5">
-            <input type="text" id="editSellPrice" inputmode="numeric" oninput="handleMoneyInput(this); updateSellPreview()" placeholder="0" class="w-full border border-emerald-300 rounded-xl px-3 py-2.5 text-base font-bold text-emerald-700 text-right tabular-nums focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
-            <button type="button" onclick="appendTripleZero('editSellPrice', false)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-extrabold text-xs px-3 py-3 rounded-xl shrink-0 transition">+000</button>
+        <!-- FORM THÊM LẦN BÁN MỚI -->
+        <div id="addSaleFormBox" class="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-extrabold text-emerald-900 flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              Thêm Lần Bán Mới
+            </h3>
+            <span id="salePreviewBadge" class="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-white text-slate-600 border border-slate-200 tabular-nums">Lời/Lỗ lần này: 0 đ</span>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">Nếu bạn bán nhiều cái với giá khác nhau, hãy nhập <b>giá bán trung bình mỗi cái</b> (hoặc tổng tiền thu về chia cho số lượng đã bán).</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Số lượng bán lần này *</label>
+              <input type="number" id="newSaleQty" min="1" value="1" oninput="updateNewSalePreview()" class="w-full border border-emerald-300 bg-white rounded-xl px-3 py-2 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-emerald-800 mb-1">Giá bán thực tế 1 món lần này (VNĐ) *</label>
+              <div class="flex items-center gap-1.5">
+                <input type="text" id="newSalePrice" inputmode="numeric" oninput="handleMoneyInput(this); updateNewSalePreview()" placeholder="0" class="w-full border border-emerald-300 bg-white rounded-xl px-3 py-2 text-sm font-extrabold text-emerald-700 text-right tabular-nums focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                <button type="button" onclick="appendTripleZero('newSalePrice', false)" class="bg-emerald-200 hover:bg-emerald-300 text-emerald-900 font-extrabold text-xs px-3 py-2.5 rounded-xl shrink-0 transition">+000</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Ngày bán *</label>
+              <input type="date" id="newSaleDate" class="w-full border border-slate-300 bg-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Khách FB / Ghi chú</label>
+              <input type="text" id="newSaleNote" placeholder="VD: Khách Mai, xả lỗ..." class="w-full border border-slate-300 bg-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            </div>
+            <div>
+              <button type="button" onclick="addSaleRecord()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-2 px-4 rounded-xl shadow-sm transition">
+                + Ghi Đơn Bán Này
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Ngày bán gần nhất</label>
-            <input type="date" id="editSellDate" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+        <!-- DANH SÁCH LỊCH SỬ CÁC LẦN ĐÃ BÁN CỦA MÓN NÀY -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Lịch sử các lần đã xuất bán (<span id="salesHistoryCount">0</span> đơn)</h3>
+            <span id="salesHistoryTotalProfit" class="text-xs font-extrabold text-slate-700 tabular-nums">Tổng lời/lỗ: 0 đ</span>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Ghi chú đơn / Khách FB</label>
-            <input type="text" id="editNote" placeholder="VD: Khách Lan 2 cái, xả lỗ 1 cái..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+
+          <div id="salesHistoryList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+            <!-- Sale records rendered here -->
           </div>
         </div>
 
-        <!-- Live Profit Preview -->
-        <div id="sellProfitPreviewBox" class="p-3.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-600">Dự tính Lời / Lỗ cho số đã bán:</span>
-          <span id="sellProfitPreviewValue" class="text-base font-extrabold tabular-nums">0 đ</span>
-        </div>
+        <!-- Điều chỉnh nhanh thông tin gốc nếu nhập nhầm số lượng -->
+        <details class="text-xs text-slate-500 border-t border-slate-200 pt-3">
+          <summary class="cursor-pointer font-semibold text-slate-600 hover:text-indigo-600">Chỉnh sửa thông tin lô nhập (nếu nhập sai tên, số lượng nhập...)</summary>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Tên mặt hàng</label>
+              <input type="text" id="editBaseName" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Phân loại</label>
+              <input type="text" id="editBaseVariant" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Tổng SL nhập ban đầu</label>
+              <div class="flex gap-1.5">
+                <input type="number" id="editBaseQtyImported" min="1" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800" />
+                <button type="button" onclick="saveBaseItemEdit()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs shrink-0">Lưu</button>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
 
-      <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-2">
-        <button type="button" onclick="closeSellModal()" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-200 transition">Đóng</button>
-        <button type="button" onclick="saveSellUpdate()" class="px-6 py-2 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition">Cập Nhật Đơn</button>
+      <div class="bg-slate-50 px-6 py-3.5 border-t border-slate-200 flex items-center justify-end shrink-0">
+        <button type="button" onclick="closeSellModal()" class="px-5 py-2 rounded-xl text-sm font-bold bg-slate-800 hover:bg-slate-900 text-white transition">Xong</button>
       </div>
     </div>
   </div>
@@ -332,12 +373,48 @@
     let currentStatusFilter = 'all';
     let batchDraftItems = [];
 
+    // Migrate old items (which had qtySold / sellPricePerUnit) to sales[] array automatically
+    function migrateItem(item) {
+      if (!Array.isArray(item.sales)) {
+        item.sales = [];
+        if (item.qtySold && item.qtySold > 0) {
+          item.sales.push({
+            saleId: 'sale_migrated_' + item.id,
+            date: item.sellDate || item.importDate || new Date().toISOString().slice(0, 10),
+            qty: item.qtySold,
+            pricePerUnit: item.sellPricePerUnit || 0,
+            note: item.note || ''
+          });
+        }
+      }
+      return item;
+    }
+
+    function getItemStats(item) {
+      const sales = Array.isArray(item.sales) ? item.sales : [];
+      let qtySold = 0;
+      let totalRevenue = 0;
+      let totalProfit = 0;
+
+      sales.forEach(s => {
+        const q = Number(s.qty) || 0;
+        const p = Number(s.pricePerUnit) || 0;
+        qtySold += q;
+        totalRevenue += q * p;
+        totalProfit += q * (p - item.landedCostPerUnit);
+      });
+
+      const remain = Math.max(0, item.qtyImported - qtySold);
+      return { sales, qtySold, remain, totalRevenue, totalProfit };
+    }
+
     // Initialize app
     function init() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
-          inventory = JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          inventory = Array.isArray(parsed) ? parsed.map(migrateItem) : [];
         } catch (e) {
           inventory = [];
         }
@@ -376,7 +453,7 @@
       el.value = nextVal.toLocaleString('vi-VN');
       el.focus();
       if (isBatch) updateBatchPreview();
-      else updateSellPreview();
+      else updateNewSalePreview();
     }
 
     function appendDraftTripleZero(idx) {
@@ -442,12 +519,16 @@
     function matchesTimeFilter(item) {
       const todayStr = new Date().toISOString().slice(0, 10);
       const monthStr = todayStr.slice(0, 7);
+      const sales = Array.isArray(item.sales) ? item.sales : [];
+
       if (currentTimeFilter === 'all') return true;
       if (currentTimeFilter === 'specific') return item.importDate === currentSpecificDate;
-      if (currentTimeFilter === 'today') return item.importDate === todayStr || item.sellDate === todayStr;
+      if (currentTimeFilter === 'today') {
+        return item.importDate === todayStr || sales.some(s => s.date === todayStr);
+      }
       if (currentTimeFilter === 'month') {
         return (item.importDate && item.importDate.startsWith(monthStr)) ||
-               (item.sellDate && item.sellDate.startsWith(monthStr));
+               sales.some(s => s.date && s.date.startsWith(monthStr));
       }
       return true;
     }
@@ -459,7 +540,10 @@
     }
 
     function renderKPIs() {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const monthStr = todayStr.slice(0, 7);
       const filtered = inventory.filter(matchesTimeFilter);
+
       let invCapital = 0;
       let invUnits = 0;
       let totalRevenue = 0;
@@ -470,22 +554,27 @@
       let lossCount = 0;
 
       filtered.forEach(item => {
-        const remain = Math.max(0, item.qtyImported - item.qtySold);
-        invCapital += remain * item.landedCostPerUnit;
-        invUnits += remain;
+        const stats = getItemStats(item);
+        invCapital += stats.remain * item.landedCostPerUnit;
+        invUnits += stats.remain;
 
-        if (item.qtySold > 0) {
-          const rev = item.qtySold * item.sellPricePerUnit;
-          const cost = item.qtySold * item.landedCostPerUnit;
-          const profit = rev - cost;
+        stats.sales.forEach(s => {
+          if (currentTimeFilter === 'today' && s.date !== todayStr && item.importDate !== todayStr) return;
+          if (currentTimeFilter === 'month' && !(s.date && s.date.startsWith(monthStr)) && !(item.importDate && item.importDate.startsWith(monthStr))) return;
+
+          const q = Number(s.qty) || 0;
+          const p = Number(s.pricePerUnit) || 0;
+          const rev = q * p;
+          const profit = q * (p - item.landedCostPerUnit);
+
           totalRevenue += rev;
-          soldUnits += item.qtySold;
+          soldUnits += q;
           totalProfit += profit;
 
           if (profit > 500) winCount++;
           else if (profit < -500) lossCount++;
           else evenCount++;
-        }
+        });
       });
 
       document.getElementById('kpi-inventory-capital').textContent = formatVND(invCapital);
@@ -497,9 +586,9 @@
       profitEl.textContent = (totalProfit > 0 ? '+' : '') + formatVND(totalProfit);
       profitEl.className = `text-2xl font-extrabold tabular-nums ${totalProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
 
-      document.getElementById('kpi-win-count').textContent = `${winCount} Lời`;
+      document.getElementById('kpi-win-count').textContent = `${winCount} Đơn lời`;
       document.getElementById('kpi-even-count').textContent = `${evenCount} Hòa`;
-      document.getElementById('kpi-loss-count').textContent = `${lossCount} Lỗ`;
+      document.getElementById('kpi-loss-count').textContent = `${lossCount} Đơn lỗ`;
     }
 
     function renderTable() {
@@ -510,16 +599,16 @@
       const filtered = inventory.filter(item => {
         if (!matchesTimeFilter(item)) return false;
 
-        const remain = Math.max(0, item.qtyImported - item.qtySold);
-        const profit = item.qtySold > 0 ? (item.sellPricePerUnit - item.landedCostPerUnit) * item.qtySold : 0;
+        const stats = getItemStats(item);
 
-        if (currentStatusFilter === 'in_stock' && remain <= 0) return false;
-        if (currentStatusFilter === 'sold_out' && remain > 0) return false;
-        if (currentStatusFilter === 'profit' && !(item.qtySold > 0 && profit > 500)) return false;
-        if (currentStatusFilter === 'loss' && !(item.qtySold > 0 && profit < -500)) return false;
+        if (currentStatusFilter === 'in_stock' && stats.remain <= 0) return false;
+        if (currentStatusFilter === 'sold_out' && stats.remain > 0) return false;
+        if (currentStatusFilter === 'profit' && !(stats.qtySold > 0 && stats.totalProfit > 500)) return false;
+        if (currentStatusFilter === 'loss' && !(stats.qtySold > 0 && stats.totalProfit < -500)) return false;
 
         if (q) {
-          const hay = `${item.name} ${item.variant} ${item.batchCode} ${item.note} ${item.link1688}`.toLowerCase();
+          const salesNotes = stats.sales.map(s => s.note || '').join(' ');
+          const hay = `${item.name} ${item.variant} ${item.batchCode} ${item.note} ${salesNotes} ${item.link1688}`.toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
@@ -533,30 +622,45 @@
 
       emptyState.classList.add('hidden');
       tbody.innerHTML = filtered.map(item => {
-        const remain = Math.max(0, item.qtyImported - item.qtySold);
-        const isSoldOut = remain === 0;
-        const profit = item.qtySold > 0 ? (item.sellPricePerUnit - item.landedCostPerUnit) * item.qtySold : 0;
+        const stats = getItemStats(item);
+        const isSoldOut = stats.remain === 0;
 
         let profitBadge = '<span class="text-xs text-slate-400 italic">Chưa bán</span>';
-        if (item.qtySold > 0) {
-          if (profit > 500) {
-            profitBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-emerald-100 text-emerald-700 tabular-nums">+${formatVND(profit)}</span>`;
-          } else if (profit < -500) {
-            profitBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-rose-100 text-rose-700 tabular-nums">${formatVND(profit)}</span>`;
+        if (stats.qtySold > 0) {
+          if (stats.totalProfit > 500) {
+            profitBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-emerald-100 text-emerald-700 tabular-nums">+${formatVND(stats.totalProfit)}</span>`;
+          } else if (stats.totalProfit < -500) {
+            profitBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-rose-100 text-rose-700 tabular-nums">${formatVND(stats.totalProfit)}</span>`;
           } else {
             profitBadge = `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 tabular-nums">Hòa vốn (0 đ)</span>`;
           }
         }
 
         const stockBadge = isSoldOut
-          ? `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-200 text-slate-700">Hết hàng (${item.qtySold}/${item.qtyImported})</span>`
-          : `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Còn ${remain}/${item.qtyImported}</span>`;
+          ? `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-200 text-slate-700">Hết hàng (${stats.qtySold}/${item.qtyImported})</span>`
+          : `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Còn ${stats.remain}/${item.qtyImported}</span>`;
 
         const linkHtml = item.link1688
           ? `<a href="${item.link1688}" target="_blank" class="text-[11px] text-blue-600 hover:underline ml-1.5">Link 1688 ↗</a>`
           : '';
 
         const weightInfo = item.totalWeightKg > 0 ? `${item.totalWeightKg} kg` : '1 loại/lô';
+
+        // Render compact list of individual sales on the row
+        let salesListHtml = '<span class="text-xs text-slate-400 italic">Chưa có đơn bán</span>';
+        if (stats.sales.length > 0) {
+          salesListHtml = `<div class="space-y-1 max-w-xs">` + stats.sales.map(s => {
+            const pDiff = (s.pricePerUnit - item.landedCostPerUnit) * s.qty;
+            const tagColor = pDiff > 500 ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+              : (pDiff < -500 ? 'text-rose-700 bg-rose-50 border-rose-200' : 'text-slate-700 bg-slate-50 border-slate-200');
+            return `
+              <div class="text-[11px] px-2 py-1 rounded-lg border ${tagColor} flex items-center justify-between gap-2 tabular-nums">
+                <span><b>${s.qty} cái</b> × ${formatVND(s.pricePerUnit)}${s.note ? ` <span class="opacity-80">(${escapeHtml(s.note)})</span>` : ''}</span>
+                <span class="text-[10px] opacity-75 shrink-0">${formatDateVN(s.date).slice(0, 5)}</span>
+              </div>
+            `;
+          }).join('') + `</div>`;
+        }
 
         return `
           <tr class="hover:bg-slate-50/90 transition">
@@ -567,7 +671,6 @@
             <td class="py-3.5 px-4 align-top max-w-xs">
               <div class="font-bold text-slate-900">${escapeHtml(item.name)} ${linkHtml}</div>
               ${item.variant ? `<div class="text-xs text-slate-500 mt-0.5">Phân loại: <span class="font-medium text-slate-700">${escapeHtml(item.variant)}</span></div>` : ''}
-              ${item.note ? `<div class="text-[11px] text-amber-700 bg-amber-50/80 px-2 py-0.5 rounded mt-1 inline-block">📝 ${escapeHtml(item.note)}</div>` : ''}
             </td>
             <td class="py-3.5 px-4 align-top text-right whitespace-nowrap tabular-nums">
               <div class="font-semibold text-slate-700">${formatVND(item.unitPrice)}</div>
@@ -583,14 +686,10 @@
             </td>
             <td class="py-3.5 px-4 align-top text-center whitespace-nowrap">
               ${stockBadge}
-              <div class="text-[11px] text-slate-500 mt-1">Đã bán: <b>${item.qtySold}</b></div>
+              <div class="text-[11px] text-slate-500 mt-1">Đã bán: <b>${stats.qtySold}</b></div>
             </td>
-            <td class="py-3.5 px-4 align-top text-right whitespace-nowrap tabular-nums">
-              ${item.qtySold > 0
-                ? `<div class="font-bold text-slate-900">${formatVND(item.sellPricePerUnit)}</div>
-                   <div class="text-[11px] text-slate-400">${item.sellDate ? 'Bán: ' + formatDateVN(item.sellDate) : ''}</div>`
-                : `<span class="text-xs text-slate-400">—</span>`
-              }
+            <td class="py-3.5 px-4 align-top">
+              ${salesListHtml}
             </td>
             <td class="py-3.5 px-4 align-top text-right whitespace-nowrap">
               ${profitBadge}
@@ -598,9 +697,9 @@
             <td class="py-3.5 px-4 align-top text-center whitespace-nowrap">
               <div class="inline-flex items-center gap-1.5">
                 <button onclick="openSellModal('${item.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition">
-                  Chốt đơn / Sửa
+                  + Chốt đơn (${stats.sales.length})
                 </button>
-                <button onclick="deleteItem('${item.id}')" title="Xóa dòng này" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition">
+                <button onclick="deleteItem('${item.id}')" title="Xóa mặt hàng này" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </button>
               </div>
@@ -727,7 +826,6 @@
           const w = Math.max(0, parseFloat(it.totalWeightKg) || 0);
           allocatedShipForType = totalShip * (w / totalWeight);
         } else {
-          // Fallback if user hasn't typed weights yet: split evenly by item count
           allocatedShipForType = totalShip / batchDraftItems.length;
         }
 
@@ -791,14 +889,11 @@
         variant: c.variant.trim(),
         link1688: c.link1688.trim(),
         qtyImported: c.qty,
-        qtySold: 0,
         unitPrice: c.unitPrice,
         shipPerUnit: Math.round(c.shipPerUnit),
         landedCostPerUnit: Math.round(c.landedCostPerUnit),
         totalWeightKg: parseFloat(c.totalWeightKg) || 0,
-        sellPricePerUnit: 0,
-        sellDate: '',
-        note: ''
+        sales: []
       }));
 
       inventory = [...newRecords, ...inventory];
@@ -806,23 +901,25 @@
       closeBatchModal();
     }
 
-    // SELL / EDIT MODAL LOGIC
+    // MULTI-SALE MODAL LOGIC
     function openSellModal(id) {
       const item = inventory.find(x => x.id === id);
       if (!item) return;
+      migrateItem(item);
 
       document.getElementById('editItemId').value = item.id;
       document.getElementById('sellModalSubtitle').textContent = `${item.name}${item.variant ? ' (' + item.variant + ')' : ''}`;
-      document.getElementById('refBasePrice').textContent = formatVND(item.unitPrice);
-      document.getElementById('refLandedCost').textContent = formatVND(item.landedCostPerUnit);
+      document.getElementById('editBaseName').value = item.name;
+      document.getElementById('editBaseVariant').value = item.variant || '';
+      document.getElementById('editBaseQtyImported').value = item.qtyImported;
 
-      document.getElementById('editQtyImported').value = item.qtyImported;
-      document.getElementById('editQtySold').value = item.qtySold;
-      document.getElementById('editSellPrice').value = item.sellPricePerUnit > 0 ? item.sellPricePerUnit.toLocaleString('vi-VN') : '';
-      document.getElementById('editSellDate').value = item.sellDate || new Date().toISOString().slice(0, 10);
-      document.getElementById('editNote').value = item.note || '';
+      // Reset new sale inputs
+      document.getElementById('newSaleQty').value = 1;
+      document.getElementById('newSalePrice').value = '';
+      document.getElementById('newSaleDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('newSaleNote').value = '';
 
-      updateSellPreview();
+      refreshSellModalState(item);
       document.getElementById('sellModal').classList.remove('hidden');
     }
 
@@ -830,70 +927,175 @@
       document.getElementById('sellModal').classList.add('hidden');
     }
 
-    function updateSellPreview() {
+    function refreshSellModalState(item) {
+      const stats = getItemStats(item);
+      document.getElementById('refBasePrice').textContent = formatVND(item.unitPrice);
+      document.getElementById('refLandedCost').textContent = formatVND(item.landedCostPerUnit);
+      document.getElementById('refRemainStock').textContent = `${stats.remain} / ${item.qtyImported} cái`;
+
+      const qtyInput = document.getElementById('newSaleQty');
+      qtyInput.max = stats.remain;
+      if (stats.remain > 0 && (parseInt(qtyInput.value) || 0) > stats.remain) {
+        qtyInput.value = stats.remain;
+      }
+
+      document.getElementById('salesHistoryCount').textContent = stats.sales.length;
+      const totalProfitEl = document.getElementById('salesHistoryTotalProfit');
+      totalProfitEl.textContent = `Tổng lời/lỗ: ${stats.totalProfit > 0 ? '+' : ''}${formatVND(stats.totalProfit)}`;
+      totalProfitEl.className = `text-xs font-extrabold tabular-nums ${stats.totalProfit > 500 ? 'text-emerald-600' : (stats.totalProfit < -500 ? 'text-rose-600' : 'text-slate-700')}`;
+
+      const listEl = document.getElementById('salesHistoryList');
+      if (stats.sales.length === 0) {
+        listEl.innerHTML = `<div class="text-xs text-slate-400 italic bg-slate-50 border border-dashed border-slate-200 rounded-xl p-4 text-center">Chưa có lần bán nào được ghi cho mặt hàng này.</div>`;
+      } else {
+        listEl.innerHTML = stats.sales.map((s, idx) => {
+          const lineProfit = (s.pricePerUnit - item.landedCostPerUnit) * s.qty;
+          const badgeClass = lineProfit > 500
+            ? 'bg-emerald-100 text-emerald-700'
+            : (lineProfit < -500 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700');
+          const profitText = lineProfit > 500
+            ? `Lời +${formatVND(lineProfit)}`
+            : (lineProfit < -500 ? `Lỗ ${formatVND(lineProfit)}` : 'Hòa vốn');
+
+          return `
+            <div class="p-3 rounded-xl border border-slate-200 bg-white flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="space-y-0.5">
+                <div class="font-bold text-slate-800">
+                  Lần #${idx + 1}: <span class="text-indigo-700">${s.qty} cái</span> × <span class="text-slate-900 tabular-nums">${formatVND(s.pricePerUnit)}/cái</span>
+                  <span class="text-slate-400 font-normal ml-1">(= ${formatVND(s.qty * s.pricePerUnit)})</span>
+                </div>
+                <div class="text-[11px] text-slate-500">
+                  Ngày: <b>${formatDateVN(s.date)}</b> ${s.note ? `• 📝 <span class="text-slate-700">${escapeHtml(s.note)}</span>` : ''}
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-lg font-extrabold tabular-nums ${badgeClass}">${profitText}</span>
+                <button type="button" onclick="deleteSaleRecord('${item.id}', '${s.saleId}')" title="Xóa lần bán này" class="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      updateNewSalePreview();
+    }
+
+    function updateNewSalePreview() {
       const id = document.getElementById('editItemId').value;
       const item = inventory.find(x => x.id === id);
       if (!item) return;
 
-      const qtySold = Math.max(0, parseInt(document.getElementById('editQtySold').value) || 0);
-      const sellPrice = parseMoney(document.getElementById('editSellPrice').value);
-      const box = document.getElementById('sellProfitPreviewBox');
-      const valEl = document.getElementById('sellProfitPreviewValue');
+      const qty = Math.max(0, parseInt(document.getElementById('newSaleQty').value) || 0);
+      const price = parseMoney(document.getElementById('newSalePrice').value);
+      const badge = document.getElementById('salePreviewBadge');
 
-      if (qtySold === 0 || sellPrice === 0) {
-        box.className = 'p-3.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between';
-        valEl.className = 'text-base font-extrabold text-slate-500 tabular-nums';
-        valEl.textContent = '0 đ';
+      if (qty === 0 || price === 0) {
+        badge.className = 'text-xs font-extrabold px-2.5 py-1 rounded-lg bg-white text-slate-500 border border-slate-200 tabular-nums';
+        badge.textContent = 'Lời/Lỗ lần này: 0 đ';
         return;
       }
 
-      const profit = (sellPrice - item.landedCostPerUnit) * qtySold;
+      const profit = (price - item.landedCostPerUnit) * qty;
       if (profit > 500) {
-        box.className = 'p-3.5 rounded-xl border bg-emerald-50 border-emerald-200 flex items-center justify-between';
-        valEl.className = 'text-base font-extrabold text-emerald-700 tabular-nums';
-        valEl.textContent = `Lời +${formatVND(profit)}`;
+        badge.className = 'text-xs font-extrabold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-200 tabular-nums';
+        badge.textContent = `Lời +${formatVND(profit)}`;
       } else if (profit < -500) {
-        box.className = 'p-3.5 rounded-xl border bg-rose-50 border-rose-200 flex items-center justify-between';
-        valEl.className = 'text-base font-extrabold text-rose-700 tabular-nums';
-        valEl.textContent = `Lỗ ${formatVND(profit)}`;
+        badge.className = 'text-xs font-extrabold px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800 border border-rose-200 tabular-nums';
+        badge.textContent = `Lỗ ${formatVND(profit)}`;
       } else {
-        box.className = 'p-3.5 rounded-xl border bg-slate-100 border-slate-300 flex items-center justify-between';
-        valEl.className = 'text-base font-extrabold text-slate-700 tabular-nums';
-        valEl.textContent = 'Hòa vốn (0 đ)';
+        badge.className = 'text-xs font-extrabold px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800 tabular-nums';
+        badge.textContent = 'Hòa vốn (0 đ)';
       }
     }
 
-    function saveSellUpdate() {
+    function addSaleRecord() {
       const id = document.getElementById('editItemId').value;
-      const idx = inventory.findIndex(x => x.id === id);
-      if (idx === -1) return;
+      const item = inventory.find(x => x.id === id);
+      if (!item) return;
+      migrateItem(item);
 
-      const qtyImported = Math.max(1, parseInt(document.getElementById('editQtyImported').value) || 1);
-      const qtySold = Math.max(0, parseInt(document.getElementById('editQtySold').value) || 0);
-      const sellPricePerUnit = parseMoney(document.getElementById('editSellPrice').value);
-      const sellDate = document.getElementById('editSellDate').value;
-      const note = document.getElementById('editNote').value.trim();
+      const stats = getItemStats(item);
+      const qty = Math.max(0, parseInt(document.getElementById('newSaleQty').value) || 0);
+      const pricePerUnit = parseMoney(document.getElementById('newSalePrice').value);
+      const date = document.getElementById('newSaleDate').value || new Date().toISOString().slice(0, 10);
+      const note = document.getElementById('newSaleNote').value.trim();
 
-      if (qtySold > qtyImported) {
-        alert('Số lượng đã bán không thể lớn hơn tổng số lượng nhập!');
+      if (stats.remain <= 0) {
+        alert('Mặt hàng này đã bán hết tồn kho rồi!');
+        return;
+      }
+      if (qty <= 0) {
+        alert('Vui lòng nhập số lượng bán lớn hơn 0!');
+        return;
+      }
+      if (qty > stats.remain) {
+        alert(`Trong kho chỉ còn ${stats.remain} cái, không thể bán ${qty} cái!`);
+        return;
+      }
+      if (pricePerUnit <= 0) {
+        alert('Vui lòng nhập giá bán thực tế cho lần bán này!');
         return;
       }
 
-      inventory[idx] = {
-        ...inventory[idx],
-        qtyImported,
-        qtySold,
-        sellPricePerUnit,
-        sellDate: qtySold > 0 ? sellDate : '',
+      item.sales.push({
+        saleId: 'sale_' + Date.now(),
+        date,
+        qty,
+        pricePerUnit,
         note
-      };
+      });
+
+      // Reset inputs for quick next entry
+      document.getElementById('newSaleQty').value = 1;
+      document.getElementById('newSalePrice').value = '';
+      document.getElementById('newSaleNote').value = '';
 
       saveData();
-      closeSellModal();
+      refreshSellModalState(item);
+    }
+
+    function deleteSaleRecord(itemId, saleId) {
+      const item = inventory.find(x => x.id === itemId);
+      if (!item) return;
+      if (confirm('Xóa lần bán này khỏi lịch sử? Số lượng tồn kho sẽ tự động cộng trả lại.')) {
+        item.sales = item.sales.filter(s => s.saleId !== saleId);
+        saveData();
+        refreshSellModalState(item);
+      }
+    }
+
+    function saveBaseItemEdit() {
+      const id = document.getElementById('editItemId').value;
+      const item = inventory.find(x => x.id === id);
+      if (!item) return;
+
+      const newName = document.getElementById('editBaseName').value.trim();
+      const newVariant = document.getElementById('editBaseVariant').value.trim();
+      const newQtyImported = Math.max(1, parseInt(document.getElementById('editBaseQtyImported').value) || 1);
+      const stats = getItemStats(item);
+
+      if (!newName) {
+        alert('Tên mặt hàng không được để trống!');
+        return;
+      }
+      if (newQtyImported < stats.qtySold) {
+        alert(`Tổng số lượng nhập không thể nhỏ hơn số lượng đã bán (${stats.qtySold} cái)!`);
+        return;
+      }
+
+      item.name = newName;
+      item.variant = newVariant;
+      item.qtyImported = newQtyImported;
+      document.getElementById('sellModalSubtitle').textContent = `${item.name}${item.variant ? ' (' + item.variant + ')' : ''}`;
+      saveData();
+      refreshSellModalState(item);
+      alert('Đã cập nhật thông tin lô nhập!');
     }
 
     function deleteItem(id) {
-      if (confirm('Bạn có chắc chắn muốn xóa mặt hàng này khỏi danh sách không?')) {
+      if (confirm('Bạn có chắc chắn muốn xóa toàn bộ mặt hàng này khỏi danh sách không?')) {
         inventory = inventory.filter(x => x.id !== id);
         saveData();
       }
@@ -920,15 +1122,16 @@
         try {
           const imported = JSON.parse(e.target.result);
           if (!Array.isArray(imported)) throw new Error('Sai định dạng');
-          if (confirm(`Tìm thấy ${imported.length} mặt hàng trong file. Bạn muốn GỘP THÊM vào dữ liệu hiện tại (OK) hay THAY THẾ toàn bộ (Cancel)?`)) {
+          const normalized = imported.map(migrateItem);
+          if (confirm(`Tìm thấy ${normalized.length} mặt hàng trong file. Bạn muốn GỘP THÊM vào dữ liệu hiện tại (OK) hay THAY THẾ toàn bộ (Cancel)?`)) {
             const existingIds = new Set(inventory.map(x => x.id));
             const merged = [...inventory];
-            imported.forEach(item => {
+            normalized.forEach(item => {
               if (!existingIds.has(item.id)) merged.push(item);
             });
             inventory = merged;
           } else {
-            inventory = imported;
+            inventory = normalized;
           }
           saveData();
           alert('Đã nạp dữ liệu thành công!');
@@ -945,25 +1148,24 @@
         alert('Chưa có dữ liệu để xuất Excel!');
         return;
       }
-      const headers = ['Ngày nhập', 'Mã lô', 'Tên mặt hàng', 'Phân loại', 'Số lượng nhập', 'Đã bán', 'Tồn kho', 'Giá chưa ship (VNĐ)', 'Ship 1 món (VNĐ)', 'Giá vốn sau ship (VNĐ)', 'Giá bán ra (VNĐ)', 'Ngày bán', 'Lời/Lỗ thực tế (VNĐ)', 'Ghi chú'];
+      const headers = ['Ngày nhập', 'Mã lô', 'Tên mặt hàng', 'Phân loại', 'Số lượng nhập', 'Đã bán', 'Tồn kho', 'Giá chưa ship (VNĐ)', 'Ship 1 món (VNĐ)', 'Giá vốn sau ship (VNĐ)', 'Chi tiết các lần bán', 'Tổng doanh thu (VNĐ)', 'Tổng Lời/Lỗ (VNĐ)'];
       const rows = inventory.map(it => {
-        const remain = Math.max(0, it.qtyImported - it.qtySold);
-        const profit = it.qtySold > 0 ? (it.sellPricePerUnit - it.landedCostPerUnit) * it.qtySold : 0;
+        const stats = getItemStats(it);
+        const salesDetail = stats.sales.map(s => `${formatDateVN(s.date)}: ${s.qty} cái x ${s.pricePerUnit}đ${s.note ? ' (' + s.note + ')' : ''}`).join(' | ');
         return [
           it.importDate,
           it.batchCode,
           it.name,
           it.variant,
           it.qtyImported,
-          it.qtySold,
-          remain,
+          stats.qtySold,
+          stats.remain,
           it.unitPrice,
           it.shipPerUnit,
           it.landedCostPerUnit,
-          it.sellPricePerUnit,
-          it.sellDate,
-          profit,
-          it.note
+          salesDetail,
+          stats.totalRevenue,
+          stats.totalProfit
         ].map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',');
       });
 
